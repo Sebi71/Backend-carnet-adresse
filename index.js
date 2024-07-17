@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 mongoose.connect("mongodb://localhost/carnet-adresses");
 
-app.use(("/contacts", contactRoutes));
+app.use("/contacts", contactRoutes);
 
 app.use((req, res) => {
   res.status(404).send("Page introuvable");
