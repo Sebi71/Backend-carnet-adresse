@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const { StatusCodes } = require("http-status-codes");
 const Contact = require("../models/contact");
 const catchAsync = require("../helpers/catchAsync");
@@ -13,15 +14,32 @@ const getAll = catchAsync (async (req, res) => {
 });
 
 const getById = catchAsync (async (req, res) => {
-    const contact = await Contact.findById(req.params.id);
-    if (contact) {
-        res.send(contact);
-    } else {
+    const { id } = req.params;
+
+    if (!mongoose.isValidObjectId(id)) {
+        console.log("Catch erreur conversion ObjectId");
+        return res
+            .status(StatusCodes.BAD_REQUEST)
+            .send("Format de l'id incorrect");
+    }
+
+    try {
+        const contact = await Contact.findById(id);
+        if (contact) {
+            res.send(contact);
+        } else {
+            res
+                .status(StatusCodes.NOT_FOUND)
+                .send("Contact non trouvé");
+        }
+    } catch (error) {
+        console.log(error);
         res
-            .status(StatusCodes.NOT_FOUND)
-            .send("Contact not found");
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .send("Erreur interne du serveur");
     }
 });
+
 
 const updateById = catchAsync (async (req, res) => {
     const contact = await Contact.findByIdAndUpdate(req.params.id, req.body, {new: true});
